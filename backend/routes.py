@@ -1,6 +1,8 @@
 from app import app, db
 from flask import request, jsonify
 from models import Application
+from datetime import datetime
+#API routes flask
 
 # Get all applications
 @app.route("/api/applications", methods=["GET"])
@@ -14,7 +16,7 @@ def get_applications():
 def create_application():
     try:
         data = request.json
-        required_fields = ["status", "company", "role"]
+        required_fields = ["company", "role", "status"]
         for field in required_fields:
             if field not in data:
                 return jsonify({"error": f"Missing required field: {field}"}), 400
@@ -24,7 +26,6 @@ def create_application():
             role=data.get("role"),
             company=data.get("company"),
             notes=data.get("notes", ""),
-            timeline=data.get("timeline", "")
         )
         db.session.add(application) #like git add .
         db.session.commit() #like git commit
@@ -59,9 +60,8 @@ def update_application(id):
         data = request.json
         application.status = data.get("status", application.status)
         application.company = data.get("company", application.company)
+        application.role = data.get("role", application.role)
         application.notes = data.get("notes", application.notes)
-        application.timeline = data.get("timeline", application.timeline)
-
         db.session.commit()
         return jsonify(application.to_json()), 200
     except Exception as e:
